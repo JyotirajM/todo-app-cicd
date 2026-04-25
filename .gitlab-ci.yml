@@ -2,6 +2,7 @@ stages:
   - test
   - build
   - security
+  - release
 
 unit-tests:
   stage: test
@@ -33,5 +34,14 @@ trivy-scan:
   script:
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
     - docker run --rm aquasec/trivy:latest image --exit-code 0 --severity HIGH,CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  only:
+    - main
+
+release-notes:
+  stage: release
+  image: python:3.11-slim
+  script:
+    - python release_notes.py
+    - cat CHANGELOG.md
   only:
     - main
