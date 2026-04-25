@@ -40,6 +40,7 @@ trivy-scan:
 release-notes:
   stage: release
   image: python:3.11-slim
+  allow_failure: true
   before_script:
     - apt-get update -qq && apt-get install -y -qq git
   script:
