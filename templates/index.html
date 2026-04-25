@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #e8ff47;
+      --accent-dim: rgba(232,255,71,0.12);
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --danger: #ff4757;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 60px 20px;
+    }
+
+    .container { width: 100%; max-width: 560px; }
+
+    header { margin-bottom: 40px; }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    h1 span { font-weight: 500; }
+
+    .stats {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--text-muted); }
+
+    button.add-btn {
+      background: var(--accent);
+      color: #0f0f0f;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    button.add-btn:hover { opacity: 0.88; }
+    button.add-btn:active { transform: scale(0.97); }
+
+    .filters {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .filter-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .todo-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .todo-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      transition: border-color 0.15s, opacity 0.2s;
+      animation: slideIn 0.18s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .todo-item:hover { border-color: #3a3a3a; }
+    .todo-item.done { opacity: 0.45; }
+
+    .check {
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .check:hover { border-color: var(--accent); }
+
+    .todo-item.done .check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .check-icon { display: none; width: 10px; height: 10px; }
+    .todo-item.done .check-icon { display: block; }
+
+    .todo-title {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 400;
+      transition: color 0.15s;
+    }
+
+    .todo-item.done .todo-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .todo-item:hover .del-btn { opacity: 1; }
+    .del-btn:hover { color: var(--danger); }
+
+    .empty {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="tag">// pipeline demo app</div>
+    <h1>My <span>Tasks</span></h1>
+    <div class="stats" id="stats">0 tasks · 0 done</div>
+  </header>
+
+  <div class="input-row">
+    <input type="text" id="new-todo" placeholder="Add a new task..." maxlength="200">
+    <button class="add-btn" onclick="addTodo()">+ Add</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('active', this)">Active</button>
+    <button class="filter-btn" onclick="setFilter('done', this)">Done</button>
+  </div>
+
+  <div class="todo-list" id="todo-list"></div>
+</div>
+
+<script>
+  let todos = [];
+  let filter = 'all';
+
+  async function fetchTodos() {
+    const res = await fetch('/api/todos');
+    todos = await res.json();
+    render();
+  }
+
+  async function addTodo() {
+    const input = document.getElementById('new-todo');
+    const title = input.value.trim();
+    if (!title) return;
+    const res = await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title })
+    });
+    if (res.ok) {
+      const todo = await res.json();
+      todos.unshift(todo);
+      input.value = '';
+      render();
+    }
+  }
+
+  async function toggleTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    const res = await fetch(`/api/todos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: !todo.completed })
+    });
+    if (res.ok) {
+      todo.completed = !todo.completed;
+      render();
+    }
+  }
+
+  async function deleteTodo(id) {
+    await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+    todos = todos.filter(t => t.id !== id);
+    render();
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('todo-list');
+    const done = todos.filter(t => t.completed).length;
+    document.getElementById('stats').textContent =
+      `${todos.length} task${todos.length !== 1 ? 's' : ''} · ${done} done`;
+
+    const visible = todos.filter(t => {
+      if (filter === 'active') return !t.completed;
+      if (filter === 'done') return t.completed;
+      return true;
+    });
+
+    if (!visible.length) {
+      list.innerHTML = `<div class="empty">no tasks here</div>`;
+      return;
+    }
+
+    list.innerHTML = visible.map(t => `
+      <div class="todo-item ${t.completed ? 'done' : ''}" id="item-${t.id}">
+        <div class="check" onclick="toggleTodo(${t.id})">
+          <svg class="check-icon" viewBox="0 0 10 10" fill="none">
+            <path d="M1.5 5L4 7.5L8.5 2.5" stroke="#0f0f0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="todo-title">${escHtml(t.title)}</span>
+        <button class="del-btn" onclick="deleteTodo(${t.id})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('new-todo').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTodo();
+  });
+
+  fetchTodos();
+</script>
+</body>
+</html>
